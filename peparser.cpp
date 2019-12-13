@@ -61,7 +61,7 @@ namespace peparser
 			out << L"Identical.";
 		else if(IsEquivalent())
 			out << L"Functionally equivalent.";
-		else 
+		else
 			out << L"Not equivalent.";
 		out << L'\n' << L'\n';
 
@@ -91,7 +91,7 @@ namespace peparser
 
 		out << std::endl;
 
-		if(!m_verbose) 
+		if(!m_verbose)
 			return;
 
 		out.setf(std::ios::hex, std::ios::basefield);
@@ -145,7 +145,7 @@ namespace peparser
 			return false;
 
 		PIMAGE_NT_HEADERS ntHeaders = (PIMAGE_NT_HEADERS)&ntHeaderBuffer[0];
-	
+
 		x64 = ntHeaders->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC;
 
 		return ntHeaders->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC || ntHeaders->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC;
@@ -185,14 +185,14 @@ namespace peparser
 			return false;
 		}
 
-		m_fileMap = CreateFileMapping(m_file, NULL, PAGE_READONLY, 0, 0, NULL); 
+		m_fileMap = CreateFileMapping(m_file, NULL, PAGE_READONLY, 0, 0, NULL);
 		if(!m_fileMap)
 		{
 			std::wcerr << L"Failed to map file into memory. " << GetLastError() << std::endl;
 			return false;
 		}
 
-		m_view = MapViewOfFile(m_fileMap, FILE_MAP_READ, 0, 0, 0); 
+		m_view = MapViewOfFile(m_fileMap, FILE_MAP_READ, 0, 0, 0);
 		if(!m_view)
 		{
 			std::wcerr << L"Failed to open view. " << GetLastError() << std::endl;
@@ -225,14 +225,14 @@ namespace peparser
 			return false;
 		}
 
-		m_fileMap = CreateFileMapping(m_file, NULL, PAGE_READWRITE, 0, 0, NULL); 
+		m_fileMap = CreateFileMapping(m_file, NULL, PAGE_READWRITE, 0, 0, NULL);
 		if(!m_fileMap)
 		{
 			std::wcerr << L"Failed to map file into memory. " << GetLastError() << std::endl;
 			return false;
 		}
 
-		m_view = MapViewOfFile(m_fileMap, FILE_MAP_WRITE, 0, 0, 0); 
+		m_view = MapViewOfFile(m_fileMap, FILE_MAP_WRITE, 0, 0, 0);
 		if(!m_view)
 		{
 			std::wcerr << L"Failed to open view. " << GetLastError() << std::endl;
@@ -303,14 +303,14 @@ namespace peparser
 		if(IsBadReadPtr(&ntHeaders->OptionalHeader, ntHeaders->FileHeader.SizeOfOptionalHeader))
 			return false;
 
-		PIMAGE_SECTION_HEADER sectionHeaders = IMAGE_FIRST_SECTION(ntHeaders); 
+		PIMAGE_SECTION_HEADER sectionHeaders = IMAGE_FIRST_SECTION(ntHeaders);
 
 		if(IsBadReadPtr(sectionHeaders, ntHeaders->FileHeader.NumberOfSections * sizeof(IMAGE_SECTION_HEADER)))
 			return false;
 
 		if(ntHeaders->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR32_MAGIC)
 			m_pe32Plus = false;
-		else 
+		else
 			if(ntHeaders->OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR64_MAGIC)
 				m_pe32Plus = true;
 			else
@@ -337,7 +337,7 @@ namespace peparser
 
 	bool PEParser::ReadSections(PIMAGE_NT_HEADERS ntHeaders)
 	{
-		PIMAGE_SECTION_HEADER sectionHeader = IMAGE_FIRST_SECTION(ntHeaders); 
+		PIMAGE_SECTION_HEADER sectionHeader = IMAGE_FIRST_SECTION(ntHeaders);
 
 		m_interesting.push_back(Block(
 			  L"Sections directory"
@@ -374,15 +374,15 @@ namespace peparser
 	bool PEParser::FindFileOffsetFromRva(PIMAGE_NT_HEADERS ntHeaders, DWORD rva, DWORD& fileOffset)
 	{
 		// file offset
-		PIMAGE_SECTION_HEADER sectionHeader = IMAGE_FIRST_SECTION(ntHeaders); 
+		PIMAGE_SECTION_HEADER sectionHeader = IMAGE_FIRST_SECTION(ntHeaders);
 
 		bool found = false;
 		for(int i = 0; i < ntHeaders->FileHeader.NumberOfSections; i++, sectionHeader++)
 		{
 			DWORD sectionSize = sectionHeader->Misc.VirtualSize;
 
-			if(sectionSize == 0) // compensate for Watcom linker strangeness, according to Matt Pietrek 
-				sectionSize = sectionHeader->SizeOfRawData; 
+			if(sectionSize == 0) // compensate for Watcom linker strangeness, according to Matt Pietrek
+				sectionSize = sectionHeader->SizeOfRawData;
 
 			if((rva >= sectionHeader->VirtualAddress) && (rva < sectionHeader->VirtualAddress + sectionSize) )
 			{
@@ -391,7 +391,7 @@ namespace peparser
 			}
 		}
 
-		if(found) 
+		if(found)
 			fileOffset = rva + (int)sectionHeader->PointerToRawData - sectionHeader->VirtualAddress;
 
 		return found;
@@ -425,7 +425,7 @@ namespace peparser
 				m_dllDelayedImports.push_back((char*)((LPBYTE)m_view + fileOffset));
 			++delayLoadDescriptor;
 		}
-	
+
 		return true;
 	}
 
@@ -461,7 +461,7 @@ namespace peparser
 			stream << L"Size    : " << (float)m_fileSize/1024 << L" Kb" << L'\n';
 			stream << L"Version : " << FileVersion() << L'\n';
 			stream << L"PDB     : " << PDBPath() << L'\n';
-			stream << L"PDB GUID: " << PDBGUID() << L'\n'; 
+			stream << L"PDB GUID: " << PDBGUID() << L'\n';
 			stream << L"Signed  : " << ((IsSigned())?"true (not verified)":"false") << L'\n';
 
 			if(IsCorrupted())
@@ -525,7 +525,7 @@ namespace peparser
 
 	bool PEParser::ReadTypeLibrary(ResourceEntryPtr node)
 	{
-		if(!node) 
+		if(!node)
 			return false;
 
 		if(node->IsData())
@@ -539,17 +539,17 @@ namespace peparser
 
 	bool PEParser::ReadTypeLibrary(LPVOID data, size_t size)
 	{
-		if(!data) 
+		if(!data)
 			return false;
 
 		return false;
-	
+
 		// disabled because of dependency on GPL'ed code
 	}
 
 	bool PEParser::ReadVsVersionInfo(ResourceEntryPtr node)
 	{
-		if(!node) 
+		if(!node)
 			return false;
 
 		if(node->IsData())
@@ -563,7 +563,7 @@ namespace peparser
 
 	bool PEParser::ReadVsVersionInfo(LPVOID data, size_t size)
 	{
-		if(!data) 
+		if(!data)
 			return false;
 
 		VS_VersionInfo info(data, size);
@@ -581,8 +581,8 @@ namespace peparser
 		std::wstringstream ss; ss
 			<< (fixedInfo->dwFileVersionMS >> 8*sizeof(WORD)) << L"."
 			<< (fixedInfo->dwFileVersionMS & 0x0000FFFF) << L"."
-			<< (fixedInfo->dwFileVersionLS >> 8*sizeof(WORD)) << L"." 
-			<< (fixedInfo->dwFileVersionLS & 0x0000FFFF) 
+			<< (fixedInfo->dwFileVersionLS >> 8*sizeof(WORD)) << L"."
+			<< (fixedInfo->dwFileVersionLS & 0x0000FFFF)
 		;
 		m_fileVersion = ss.str();
 
@@ -590,12 +590,12 @@ namespace peparser
 
 		for(auto& entry : info.Entries())
 		{
-			if(!entry || !entry->IsWellFormed()) 
+			if(!entry || !entry->IsWellFormed())
 				continue;
 
 			for(auto& table : entry->Entries())
 			{
-				if(!table || !table->IsWellFormed()) 
+				if(!table || !table->IsWellFormed())
 					continue;
 
 				std::wstring comment = L"VS " + table->Name() + L":";
@@ -613,6 +613,18 @@ namespace peparser
 					m_ignored.push_back(Block(comment + L" ProductVersion", FileOffset(value), valSize));
 					m_modifiable.insert(std::make_pair(ProductVersionString, m_ignored.back()));
 				}
+
+                if (table->OriginalValue(L"PrivateBuild", &value, &valSize))
+                {
+                    m_ignored.push_back(Block(comment + L" PrivateBuild", FileOffset(value), valSize));
+                    m_modifiable.insert(std::make_pair(PrivateBuildString, m_ignored.back()));
+                }
+
+                if (table->OriginalValue(L"SpecialBuild", &value, &valSize))
+                {
+                    m_ignored.push_back(Block(comment + L" SpecialBuild", FileOffset(value), valSize));
+                    m_modifiable.insert(std::make_pair(SpecialBuildString, m_ignored.back()));
+                }
 			}
 		}
 
@@ -635,7 +647,7 @@ namespace peparser
 				  L"Digital signature directory entry"
 				, FileOffset(&header->DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY])
 				, sizeof(header->DataDirectory[IMAGE_DIRECTORY_ENTRY_SECURITY])
-			));	
+			));
 
 			m_modifiable.insert(std::make_pair(SignatureDirectory, m_ignored.back()));
 		}
@@ -688,7 +700,7 @@ namespace peparser
 			m_ignored.push_back(Block(L"Debugger timestamp", FileOffset(&(info[i]->TimeDateStamp)), sizeof(info[i]->TimeDateStamp)));
 			switch(info[i]->Type)
 			{
-			case IMAGE_DEBUG_TYPE_UNKNOWN: 
+			case IMAGE_DEBUG_TYPE_UNKNOWN:
 				continue;
 			case IMAGE_DEBUG_TYPE_CODEVIEW:
 				{
@@ -696,7 +708,7 @@ namespace peparser
 					if(IsBadReadPtr(debugInfo, info[i]->SizeOfData))
 						return false;
 
-					if(info[i]->SizeOfData < sizeof(DWORD))				
+					if(info[i]->SizeOfData < sizeof(DWORD))
 						return false;
 
 					DWORD cvSignature = *(DWORD*)debugInfo;
@@ -710,8 +722,8 @@ namespace peparser
 
 						_RSDSI* cvInfo = (_RSDSI*)debugInfo;
 
-						if(IsBadStringPtrA((CHAR*)cvInfo->szPdb, UINT_MAX)) 
-							return false; 
+						if(IsBadStringPtrA((CHAR*)cvInfo->szPdb, UINT_MAX))
+							return false;
 
 						m_pdbGuid.resize(39);
 						int size = ::StringFromGUID2(cvInfo->guidSig, &m_pdbGuid[0], (int)m_pdbGuid.size());
@@ -723,7 +735,7 @@ namespace peparser
 						size_t length = strlen((char*)cvInfo->szPdb);
 						m_pdbPath = MultiByteToWideString(std::string((char*)cvInfo->szPdb, length));
 						m_ignored.push_back(Block(L"PDB 7.00 file path", FileOffset(&cvInfo->szPdb), length*sizeof(char)));
-					} 
+					}
 				}
 			}
 		}
@@ -748,7 +760,7 @@ namespace peparser
 		}
 
 		if(dir.Rva() == 0 && dir.Size() == 0)
-			return false; 
+			return false;
 
 		if(dir.Size() < sizeof(T))
 			return false;
@@ -858,7 +870,7 @@ namespace peparser
 		{
 			result.m_fast = true;
 			if(!result.m_identical && !result.m_differentSize)
-			{ 
+			{
 				LPBYTE index1 = (LPBYTE)p1.m_view;
 				LPBYTE index2 = (LPBYTE)p2.m_view;
 
@@ -1030,7 +1042,7 @@ namespace peparser
 	{
 		diffShift = 0;
 
-		if(size == 0) 
+		if(size == 0)
 			return false;
 
 		if(DetectFILEMacro(p1, p2, start1, start2, size, diffShift))
@@ -1070,23 +1082,23 @@ namespace peparser
 	template <class CharT>
 	bool PEParser::DetectFILEMacro(size_t diffStart, size_t diffSize) const
 	{
-		if(diffSize > 5) 
-			return false; 
+		if(diffSize > 5)
+			return false;
 
 		std::basic_string<CharT> pdb = PDBPathT<CharT>();
 
-		if(pdb.size() < 3) 
+		if(pdb.size() < 3)
 			return false;
-		if(diffStart < sizeof(CharT)*pdb.size()) 
+		if(diffStart < sizeof(CharT)*pdb.size())
 			return false;
 
 		CharT* diffPoint = (CharT*)((LPBYTE)m_view + diffStart);
 		const CharT* pathStart = FindStringEntry<CharT, Path>(diffPoint - pdb.size(), pdb, 3, pdb.size());
 
-		if(!pathStart) 
+		if(!pathStart)
 			return false;
-		if(size_t(diffPoint - pathStart) > pdb.size()) 
-			return false; 
+		if(size_t(diffPoint - pathStart) > pdb.size())
+			return false;
 
 		return CompareStrings<CharT, Path>(pathStart, pdb.data(), diffPoint - pathStart);
 	}
@@ -1104,14 +1116,14 @@ namespace peparser
 		// no shift
 
 		diffShift = 0;
-		return 
+		return
 			(
-			   p1.DetectFILEMacro<wchar_t>(diffStart1, diffSize) 
+			   p1.DetectFILEMacro<wchar_t>(diffStart1, diffSize)
 			&& p2.DetectFILEMacro<wchar_t>(diffStart2, diffSize)
 			)
-			|| 
+			||
 			(
-			   p1.DetectFILEMacro<char>(diffStart1, diffSize) 
+			   p1.DetectFILEMacro<char>(diffStart1, diffSize)
 			&& p2.DetectFILEMacro<char>(diffStart2, diffSize)
 			)
 		;
@@ -1122,13 +1134,13 @@ namespace peparser
 	{
 		diffShift = 0;
 
-		if(diffSize > 2) 
+		if(diffSize > 2)
 			return false; // wide char will have 1 byte diff, narrow will have max 2 bytes (between colons)
 
 		const CharT* diffPoint = (CharT*)((LPBYTE)m_view + diffStart);
 
 		const CharT* colon = NULL;
-		const int colonPoints[] = { -2, -1, +1, +2 }; 
+		const int colonPoints[] = { -2, -1, +1, +2 };
 
 		for(size_t i = 0; i < sizeof(colonPoints)/sizeof(int); ++i)
 			if(*(diffPoint + colonPoints[i]) == Literals<char>::colon)
@@ -1137,11 +1149,11 @@ namespace peparser
 				break;
 			}
 
-		if(!colon) 
+		if(!colon)
 			return false;
 
 		const CharT* null = NULL;
-		const int nullPoints[] = { +3, +6 }; 
+		const int nullPoints[] = { +3, +6 };
 
 		for(size_t i = 0; i < sizeof(nullPoints)/sizeof(int); ++i)
 			if(*(colon + nullPoints[i]) == Literals<char>::null)
@@ -1150,7 +1162,7 @@ namespace peparser
 				break;
 			}
 
-		if(!null) 
+		if(!null)
 			return false;
 
 		int hours = 0;
@@ -1158,19 +1170,19 @@ namespace peparser
 		int seconds = 0;
 
 		std::basic_stringstream<CharT> ss;
-	
+
 		ss.str(std::basic_string<CharT>(null - 8, 2));
-		if(!(ss >> hours) || 2 != ss.tellg()  || hours > 23 || hours < 0) 
+		if(!(ss >> hours) || 2 != ss.tellg()  || hours > 23 || hours < 0)
 			return false;
 
 		ss.clear();
 		ss.str(std::basic_string<CharT>(null - 5, 2));
-		if(!(ss >> minutes) || 2 != ss.tellg() || minutes > 59 || minutes < 0) 
+		if(!(ss >> minutes) || 2 != ss.tellg() || minutes > 59 || minutes < 0)
 			return false;
 
 		ss.clear();
 		ss.str(std::basic_string<CharT>(null - 2, 2));
-		if(!(ss >> seconds) || 2 != ss.tellg() || seconds > 59 || seconds < 0) 
+		if(!(ss >> seconds) || 2 != ss.tellg() || seconds > 59 || seconds < 0)
 			return false;
 
 		const CharT* diffEnd = (CharT*)((LPBYTE)m_view + diffStart + diffSize);
@@ -1185,7 +1197,7 @@ namespace peparser
 	{
 		// __TIME__ "hh:mm:ss\0"
 
-		// difference must be no more than 2 chars 
+		// difference must be no more than 2 chars
 		// find start of difference (p1)
 		// find end of difference (p2)
 		// find ':' at p1-1c, p1-2c, p1+1c or p1+2c (p3)
@@ -1219,12 +1231,12 @@ namespace peparser
 		return false;
 	}
 
-	template <class CharT> 
+	template <class CharT>
 	bool PEParser::DetectDATEMacro(size_t diffStart, size_t diffSize, size_t& diffShift) const
 	{
 		diffShift = 0;
 
-		if(diffSize > 4) 
+		if(diffSize > 4)
 			return false; // wide string would have difference of 1 byte, narrow would have up to 4 (year)
 
 		const CharT* diffPoint = (CharT*)((LPBYTE)m_view + diffStart);
@@ -1234,7 +1246,7 @@ namespace peparser
 		for(size_t i = 0; i < 11; ++i)
 		{
 			std::basic_string<CharT> month(Literals<CharT>::month[i]);
-		
+
 			dateStart = FindStringEntry<CharT, None>(diffPoint - (11 - diffSize), month, month.size(), 11);
 			if(!dateStart)
 				continue;
@@ -1244,14 +1256,14 @@ namespace peparser
 			break;
 		}
 
-		if(!dateStart) 
+		if(!dateStart)
 			return false;
 
 		std::basic_stringstream<CharT> ss(std::basic_string<CharT>(dateStart, length));
 
 		int day = 0;
 		int year = 0;
-		if(!(ss >> day) || !(ss >> year)) 
+		if(!(ss >> day) || !(ss >> year))
 			return false;
 
 		if(length == ss.tellg())
@@ -1359,7 +1371,7 @@ namespace peparser
 		}
 		else
 		{
-			const auto it = std::find_if(cbegin(m_resourceBlocks), cend(m_resourceBlocks), [](const Block& block) 
+			const auto it = std::find_if(cbegin(m_resourceBlocks), cend(m_resourceBlocks), [](const Block& block)
 			{
 				return std::wstring::npos != block.description.find(L"@TYPELIB");
 			});
@@ -1404,9 +1416,9 @@ namespace peparser
 
 	bool PEParser::SetVersion(const VersionString& version, VersionField field) const
 	{
-		if(!m_openForWrite) 
+		if(!m_openForWrite)
 			return false;
-		if(!version.IsValid()) 
+		if(!version.IsValid())
 			return false;
 
 		for (auto& entry : m_modifiable)
@@ -1460,9 +1472,9 @@ namespace peparser
 	void PEParser::EraseSignatureDirectory() const
 	{
 		ModifiableBlockMap::const_iterator it = m_modifiable.find(SignatureDirectory);
-		if(it == m_modifiable.end()) 
+		if(it == m_modifiable.end())
 			return;
-	
+
 		memset((LPBYTE)m_view + (DWORD)it->second.offset, 0, it->second.size);
 	}
 // ================================================================================================

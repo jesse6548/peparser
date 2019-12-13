@@ -25,6 +25,10 @@ namespace peparser
 		, FileVersionString
 		, ProductVersionString
 		, SignatureDirectory
+        , PrivateBuild
+        , SpecialBuild
+        , PrivateBuildString
+        , SpecialBuildString
 	};
 
 	enum UsefulBlocks
@@ -36,7 +40,7 @@ namespace peparser
 	typedef std::multimap<UsefulBlocks, Block> UsefulBlockMap;
 	typedef std::pair<UsefulBlockMap::const_iterator, UsefulBlockMap::const_iterator> UsefulBlockMapRange;
 
-	// describes PE comparison result 
+	// describes PE comparison result
 	class CompareResult
 	{
 		friend class PEParser;
@@ -127,9 +131,9 @@ namespace peparser
 		// use noHeuristics to avoid searching for __FILE__, __DATE__ and other fussily matchable differences
 		static CompareResult Compare(const PEParser& p1, const PEParser& p2, bool fast, bool noHeuristics, bool verbose, bool tlbCmpExpr);
 
-		// manually mark a range as irrelevant when comparing binaries 
+		// manually mark a range as irrelevant when comparing binaries
 		void AddIgnoredRange(const Block& block);
-		// manually mark a list of ranges as irrelevant when comparing binaries 
+		// manually mark a list of ranges as irrelevant when comparing binaries
 		void AddIgnoredRange(const BlockList& blocks);
 
 		void PEParser::PrintInfo(std::wostream& stream, bool verbose) const;
@@ -140,7 +144,7 @@ namespace peparser
 			, FileOnly
 			, ProductOnly
 		};
-		// modifies file version in place without rebuilding resources 
+		// modifies file version in place without rebuilding resources
 		// fails if new version strings are bigger than existing strings (resource table rebuild would be required then)
 		bool SetVersion(const VersionString& version, VersionField field) const;
 
